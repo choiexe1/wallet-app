@@ -3,7 +3,9 @@ import 'dart:math';
 enum EntropySize { bits128, bits256 }
 
 class EntropyGenerator {
-  final Random _random = Random.secure();
+  const EntropyGenerator(this._random);
+
+  final Random _random;
 
   Future<List<int>> generate(EntropySize size) async {
     int length = size == EntropySize.bits128 ? 16 : 32;

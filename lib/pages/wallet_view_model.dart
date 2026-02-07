@@ -1,22 +1,32 @@
 import 'package:bip39/bip39.dart' as bip39;
 import 'package:flutter/foundation.dart';
+import 'package:wallet_app/core/address_generator.dart';
 import 'package:wallet_app/core/entropy_generator.dart';
 import 'package:wallet_app/core/hasher.dart';
+import 'package:wallet_app/core/hd_key_derivator.dart';
 import 'package:wallet_app/core/storage.dart';
-import 'package:wallet_app/pages/state.dart';
+import 'package:wallet_app/pages/wallet_state.dart';
 
-class ViewModel extends ChangeNotifier {
-  ViewModel(this._entropyGenerator, this._storage, this._hasher);
+class WalletViewModel extends ChangeNotifier {
+  WalletViewModel(
+    this._entropyGenerator,
+    this._storage,
+    this._hasher,
+    this._hdKeyDerivator,
+    this._addressGenerator,
+  );
 
-  State _state = State();
+  WalletState _state = WalletState();
   final EntropyGenerator _entropyGenerator;
   final Hasher _hasher;
   final Storage _storage;
+  final HdKeyDerivator _hdKeyDerivator;
+  final AddressGenerator _addressGenerator;
 
-  State get state => _state;
+  WalletState get state => _state;
 
   Future<void> generateEntropy() async {
-    final entropy = await _entropyGenerator.generate(16);
+    final entropy = await _entropyGenerator.generate(EntropySize.bits128);
 
     _state = _state.copyWith(entropy: entropy);
     notifyListeners();
@@ -31,7 +41,7 @@ class ViewModel extends ChangeNotifier {
         .padLeft(8, '0')
         .substring(0, 4);
 
-    // 엔트로피 → 비트 문자열 (128비트)
+    // 엔트로피 비트 문자열 (128비트)
     final entropyBits = _state.entropy
         .map((b) => b.toRadixString(2).padLeft(8, '0'))
         .join();
@@ -56,6 +66,29 @@ class ViewModel extends ChangeNotifier {
     final mnemonicString = bip39.entropyToMnemonic(entropyHex);
 
     _state = _state.copyWith(mnemonic: mnemonicString.split(' '));
+    notifyListeners();
+  }
+
+  /// 니모닉 → 시드 → 마스터키 → 자식키 파생
+  Future<void> generateKey({int index = 0}) async {
+    final mnemonicString = _state.mnemonic.join(' ');
+    final keyPair = await _hdKeyDerivator.generateKey(
+      mnemonicString,
+      index: index,
+    );
+
+    _state = _state.copyWith(privateKey: keyPair.privateKey);
+    notifyListeners();
+  }
+
+  /// 개인키 → 이더리움 주소 생성
+  void generateAddress() {
+    final privateKey = _state.privateKey;
+    if (privateKey == null) return;
+
+    final address = _addressGenerator.generateAddress(privateKey);
+
+    _state = _state.copyWith(address: address);
     notifyListeners();
   }
 }

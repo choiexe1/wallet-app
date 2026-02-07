@@ -38,6 +38,8 @@ dependencies:
   flutter_secure_storage: ^10.0.0
   crypto: ^3.0.7
   get_it: ^9.2.0
+  bip32: ^2.0.0
+  web3dart: ^2.7.3
 
 dev_dependencies:
   flutter_test:
