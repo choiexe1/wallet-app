@@ -1,14 +1,36 @@
-import 'package:equatable/equatable.dart';
+import 'package:wallet_app/core/entities/account.dart';
 
-class Wallet extends Equatable {
-  const Wallet({required this.address, required this.mnemonic});
+class Wallet {
+  const Wallet({
+    required this.id,
+    required this.accounts,
+    required this.createdAt,
+  });
 
-  final String address;
-  final String mnemonic;
+  final String id;
+  final List<Account> accounts;
+  final DateTime createdAt;
 
   @override
-  List<Object?> get props => [address, mnemonic];
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Wallet &&
+          id == other.id &&
+          createdAt == other.createdAt &&
+          _listEquals(accounts, other.accounts);
 
   @override
-  String toString() => 'Wallet(address: $address, mnemonic: $mnemonic)';
+  int get hashCode => Object.hash(id, createdAt, Object.hashAll(accounts));
+
+  @override
+  String toString() =>
+      'Wallet(id: $id, accounts: ${accounts.length}, createdAt: $createdAt)';
+
+  static bool _listEquals<T>(List<T> a, List<T> b) {
+    if (a.length != b.length) return false;
+    for (int i = 0; i < a.length; i++) {
+      if (a[i] != b[i]) return false;
+    }
+    return true;
+  }
 }

@@ -1,5 +1,6 @@
-import 'package:wallet_app/core/entities/wallet.dart';
+import 'package:wallet_app/core/entities/account_credentials.dart';
 
 abstract interface class WalletGenerator {
-  Future<Wallet> generate();
+  Future<String> generateMnemonic();
+  Future<AccountCredentials> deriveAccount(String mnemonic, int accountIndex);
 }

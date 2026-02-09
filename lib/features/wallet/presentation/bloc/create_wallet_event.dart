@@ -10,3 +10,12 @@ sealed class CreateWalletEvent extends Equatable {
 final class CreateWalletSubmitted extends CreateWalletEvent {
   const CreateWalletSubmitted();
 }
+
+final class ImportWalletSubmitted extends CreateWalletEvent {
+  const ImportWalletSubmitted(this.mnemonic);
+
+  final String mnemonic;
+
+  @override
+  List<Object?> get props => [mnemonic];
+}
