@@ -1,4 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+
+import '../bloc/wallet_bloc.dart';
+import '../bloc/wallet_state.dart';
 
 class WalletPage extends StatelessWidget {
   const WalletPage({super.key});
@@ -7,10 +11,21 @@ class WalletPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(title: const Text('Wallet Page')),
-      body: const SafeArea(
+      body: SafeArea(
         child: SingleChildScrollView(
-          padding: EdgeInsets.all(16),
-          child: Column(children: [Text("지갑 페이지")]),
+          padding: const EdgeInsets.all(16),
+          child: BlocBuilder<WalletBloc, WalletState>(
+            builder: (context, state) {
+              return switch (state) {
+                WalletInitial() => const Text('지갑이 없습니다'),
+                WalletLoading() => const Center(
+                  child: CircularProgressIndicator(),
+                ),
+                WalletLoadSuccess() => Text(state.wallet.address),
+                WalletFailure() => Text(state.message),
+              };
+            },
+          ),
         ),
       ),
     );

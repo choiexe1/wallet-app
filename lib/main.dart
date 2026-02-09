@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:wallet_app/core/theme/app_theme.dart';
 import 'package:wallet_app/injector.dart';
 
 import 'core/router/app_router.dart';
@@ -17,6 +18,7 @@ class App extends StatelessWidget {
     return MaterialApp.router(
       debugShowCheckedModeBanner: false,
       title: 'Wallet App',
+      theme: AppTheme.light,
       routerConfig: appRouter,
     );
   }
