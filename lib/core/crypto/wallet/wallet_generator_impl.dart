@@ -5,6 +5,7 @@ import 'package:flutter/services.dart';
 import 'package:wallet_app/core/crypto/bip39/words.dart';
 import 'package:wallet_app/core/crypto/entropy/entropy_generator.dart';
 import 'package:wallet_app/core/crypto/wallet/wallet_generator.dart';
+import 'package:wallet_app/core/entities/extended_key.dart';
 import 'package:wallet_app/core/entities/wallet.dart';
 
 class WalletGeneratorImpl implements WalletGenerator {
@@ -14,22 +15,24 @@ class WalletGeneratorImpl implements WalletGenerator {
 
   @override
   Future<Wallet> generate() async {
-    final mnemonic = await _bip39();
-    final pbkdf2 = await _pbkdf2(mnemonic.join(' '));
+    final words = await _generateMnemonic();
+    final mnemonic = words.join(' ');
+    final seed = await _deriveSeed(mnemonic);
+    final extendedKey = _deriveMasterKey(seed);
 
-    return Wallet(mnemonic: mnemonic.join(' '), address: 'asdf');
+    return Wallet(mnemonic: mnemonic, address: 'asdf');
   }
 
-  Future<List<String>> _bip39() async {
+  Future<List<String>> _generateMnemonic() async {
     final entropy = await _entropyGenerator.generate(EntropySize.bits128);
     final entropyHex = entropy
         .map((byte) => byte.toRadixString(16).padLeft(2, '0'))
         .join();
 
     final hash = sha256.convert(entropy).toString();
-    final entropyChecksum = entropyHex + hash[0];
+    final entropyWithChecksum = entropyHex + hash[0];
 
-    final bits = entropyChecksum
+    final bits = entropyWithChecksum
         .split('')
         .map(
           (string) =>
@@ -45,7 +48,21 @@ class WalletGeneratorImpl implements WalletGenerator {
     return mnemonic;
   }
 
-  Future<Uint8List> _pbkdf2(String mnemonic, {String? passphrase}) async {
+  Future<void> _deriveChildKey() async {}
+
+  ExtendedKey _deriveMasterKey(Uint8List seed) {
+    final result = Hmac(
+      sha512,
+      utf8.encode("Bitcoin seed"),
+    ).convert(seed).bytes;
+
+    final masterKey = Uint8List.fromList(result.sublist(0, 32));
+    final chainCode = Uint8List.fromList(result.sublist(32));
+
+    return ExtendedKey(privateKey: masterKey, chainCode: chainCode);
+  }
+
+  Future<Uint8List> _deriveSeed(String mnemonic, {String? passphrase}) async {
     final password = utf8.encode(mnemonic);
     final salt = utf8.encode('mnemonic${passphrase ?? ''}');
 
