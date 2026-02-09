@@ -1,12 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:wallet_app/injector.dart';
-import 'package:wallet_app/pages/home_page.dart';
 
-void main() async {
+import 'core/router/app_router.dart';
+
+void main() {
   WidgetsFlutterBinding.ensureInitialized();
-
-  await injection();
-
+  injection();
   runApp(const App());
 }
 
@@ -15,10 +14,10 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return MaterialApp.router(
       debugShowCheckedModeBanner: false,
-      title: 'Wallet MVP',
-      home: HomePage(vm: sl.get()),
+      title: 'Wallet App',
+      routerConfig: appRouter,
     );
   }
 }

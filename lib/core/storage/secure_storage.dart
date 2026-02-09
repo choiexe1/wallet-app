@@ -1,10 +1,5 @@
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-
-abstract interface class Storage {
-  Future<void> saveString(String key, String value);
-  Future<String?> readString(String key);
-  Future<void> delete(String key);
-}
+import 'package:wallet_app/core/storage/storage.dart';
 
 class SecureStorage implements Storage {
   const SecureStorage(this._storage);
@@ -12,12 +7,12 @@ class SecureStorage implements Storage {
   final FlutterSecureStorage _storage;
 
   @override
-  Future<void> saveString(String key, String value) async {
+  Future<void> write(String key, String value) async {
     await _storage.write(key: key, value: value);
   }
 
   @override
-  Future<String?> readString(String key) async {
+  Future<String?> read(String key) async {
     return await _storage.read(key: key);
   }
 

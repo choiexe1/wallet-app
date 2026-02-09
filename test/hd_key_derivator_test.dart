@@ -1,4 +1,3 @@
-import 'package:collection/collection.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:wallet_app/core/hd_key_derivator.dart';
 

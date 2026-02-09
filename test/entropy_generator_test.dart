@@ -1,13 +1,14 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:wallet_app/core/entropy_generator.dart';
+import 'package:wallet_app/core/crypto/entropy/entropy_generator.dart';
+import 'package:wallet_app/core/crypto/entropy/entropy_generator_impl.dart';
 
 void main() {
   late EntropyGenerator generator;
 
   setUp(() {
-    generator = EntropyGenerator(Random.secure());
+    generator = EntropyGeneratorImpl(Random.secure());
   });
 
   group('EntropyGenerator', () {
