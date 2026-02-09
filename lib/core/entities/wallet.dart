@@ -8,4 +8,7 @@ class Wallet extends Equatable {
 
   @override
   List<Object?> get props => [address, mnemonic];
+
+  @override
+  String toString() => 'Wallet(address: $address, mnemonic: $mnemonic)';
 }
