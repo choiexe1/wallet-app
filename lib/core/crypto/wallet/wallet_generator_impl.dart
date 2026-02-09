@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:crypto/crypto.dart';
+import 'package:flutter/services.dart';
 import 'package:wallet_app/core/crypto/bip39/words.dart';
 import 'package:wallet_app/core/crypto/entropy/entropy_generator.dart';
 import 'package:wallet_app/core/crypto/wallet/wallet_generator.dart';
@@ -12,6 +15,7 @@ class WalletGeneratorImpl implements WalletGenerator {
   @override
   Future<Wallet> generate() async {
     final mnemonic = await _bip39();
+    final pbkdf2 = await _pbkdf2(mnemonic.join(' '));
 
     return Wallet(mnemonic: mnemonic.join(' '), address: 'asdf');
   }
@@ -39,5 +43,24 @@ class WalletGeneratorImpl implements WalletGenerator {
     );
 
     return mnemonic;
+  }
+
+  Future<Uint8List> _pbkdf2(String mnemonic, {String? passphrase}) async {
+    final password = utf8.encode(mnemonic);
+    final salt = utf8.encode('mnemonic${passphrase ?? ''}');
+
+    final hmac = Hmac(sha512, password);
+
+    List<int> prev = hmac.convert([...salt, 0, 0, 0, 1]).bytes;
+    List<int> result = List<int>.from(prev);
+
+    for (int i = 1; i < 2048; i++) {
+      prev = hmac.convert(prev).bytes;
+      for (int j = 0; j < result.length; j++) {
+        result[j] = result[j] ^ prev[j];
+      }
+    }
+
+    return Uint8List.fromList(result);
   }
 }
